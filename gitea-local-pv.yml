@@ -4,6 +4,10 @@ metadata:
   name: gitea-pv
   labels:
     app: gitea
+  # to prevent permission problems
+  # https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#access-control
+  annotations:
+    pv.beta.kubernetes.io/gid: "1234"
 spec:
   accessModes:
   - ReadWriteOnce
