@@ -25,8 +25,12 @@ spec:
       - name: gitea
         image: gitea/gitea:1.12.5
         env:
+        # The following env var is needed to prevent system call interruptions
+        # relevant issue here: https://github.com/go-gitea/gitea/issues/11620
+        # Gitea binaries compiled with Go 1.15 should not suffer from this problem
+        # and do not need this env var set 
         - name: GODEBUG
-          value: asyncpreemptoff=1 
+          value: asyncpreemptoff=1
         ports:
         - containerPort: 3000
           name: gitea-http
