@@ -63,6 +63,8 @@ spec:
   - name: gitea-http
     port: 3000
     targetPort: gitea-http
+    nodePort: 31360
   - name: gitea-ssh
     port: 22
     targetPort: gitea-ssh
+    nodePort: 31365
