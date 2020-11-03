@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-deployment
+  labels:
+    app: gitea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  template:
+    metadata:
+      labels:
+        app: gitea
+    spec:
+      initContainers:
+      - name: init-disk
+        image: busybox:latest
+        command: ['/bin/chown', '-R', '1000:1000', '/data']
+        volumeMounts:
+          - mountPath: /data
+            name: gitea-vol
+      containers:
+      - name: gitea
+        image: gitea/gitea:1.12.5
+        env:
+        - name: GODEBUG
+          value: asyncpreemptoff=1 
+        ports:
+        - containerPort: 3000
+          name: gitea-http
+        - containerPort: 22
+          name: gitea-ssh
+        volumeMounts:
+            - mountPath: /data
+              name: gitea-vol
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+      volumes:
+        - name: gitea-vol
+          persistentVolumeClaim:
+            claimName: gitea-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gitea-service
+spec:
+  type: NodePort
+  selector:
+    app: gitea
+  ports:
+  - name: gitea-http
+    port: 3000
+    targetPort: gitea-http
+  - name: gitea-ssh
+    port: 22
+    targetPort: gitea-ssh
